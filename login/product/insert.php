@@ -197,8 +197,8 @@ if (isset($_POST['Submit'])) {
         $new_file_name = uniqid() . '.' . $ext;
 
         // คำสั่ง SQL เพื่อเพิ่มข้อมูลสินค้า
-        $sql = "INSERT INTO `product` (`p_id`, `p_name`, `p_detail`, `p_price`, `p_picture`, `pt_id`) 
-                VALUES (NULL, '{$_POST['pname']}', '{$_POST['pdetail']}', '{$_POST['pprice']}', '{$new_file_name}', '{$_POST['pcat']}');";
+        $sql = "INSERT INTO `product` ( `p_name`, `p_detail`, `p_price`, `p_picture`, `pt_id`) 
+                VALUES ( '{$_POST['pname']}', '{$_POST['pdetail']}', '{$_POST['pprice']}', '{$new_file_name}', '{$_POST['pcat']}');";
         mysqli_query($conn, $sql) or die("เพิ่มข้อมูลสินค้าไม่ได้");
 
         // ดึง ID ล่าสุดที่ถูกเพิ่ม
