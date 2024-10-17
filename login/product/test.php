@@ -6,7 +6,7 @@
     <title>Upload Image</title>
 </head>
 <body>
-    <form action="upload.php" method="POST" enctype="multipart/form-data">
+    <form action="" method="POST" enctype="multipart/form-data">
         <label>Select Image to Upload:</label>
         <input type="file" name="image" required>
         <button type="submit" name="submit">Upload Image</button>
