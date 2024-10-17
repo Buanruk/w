@@ -25,7 +25,7 @@ if ($product_id > 0) {
 } else {
     // ถ้าไม่มี ID หรือ ID ไม่ถูกต้อง
     echo "ไม่พบสินค้านี้";
-    exit;
+    exit; 
 }
 ?>
 
