@@ -199,28 +199,25 @@ if (isset($_POST['Submit'])) {
         // คำสั่ง SQL เพื่อเพิ่มข้อมูลสินค้า
         $sql = "INSERT INTO `product` (`p_id`, `p_name`, `p_detail`, `p_price`, `p_picture`, `pt_id`) 
                 VALUES (NULL, '{$_POST['pname']}', '{$_POST['pdetail']}', '{$_POST['pprice']}', '{$new_file_name}', '{$_POST['pcat']}');";
-        
-        if (mysqli_query($conn, $sql)) {
-            $idauto = mysqli_insert_id($conn); // ดึง ID ล่าสุดที่ถูกเพิ่ม
+        mysqli_query($conn, $sql) or die("เพิ่มข้อมูลสินค้าไม่ได้");
 
-            // ย้ายไฟล์ไปยังโฟลเดอร์ที่ต้องการเก็บ
-            if (move_uploaded_file($_FILES['pimg']['tmp_name'], "images/" . $new_file_name)) {
-                echo "<script>";
-                echo "alert('เพิ่มข้อมูลสินค้าสำเร็จ');";
-                echo "window.location='indexproduct.php';";
-                echo "</script>";
-            } else {
-                die("คัดลอกไฟล์ไม่สำเร็จ");
-            }
+        // ดึง ID ล่าสุดที่ถูกเพิ่ม
+        $idauto = mysqli_insert_id($conn);
+
+        // ย้ายไฟล์ไปยังโฟลเดอร์ที่ต้องการเก็บ
+        if (move_uploaded_file($_FILES['pimg']['tmp_name'], "images/" . $new_file_name)) {
+            echo "<script>";
+            echo "alert('เพิ่มข้อมูลสินค้าสำเร็จ');";
+            echo "window.location='indexproduct.php';";
+            echo "</script>";
         } else {
-            // แสดงข้อผิดพลาดจาก MySQL
-            echo "Error: " . mysqli_error($conn);
+            die("คัดลอกไฟล์ไม่สำเร็จ");
         }
     } else {
         die("เกิดข้อผิดพลาดในการอัปโหลดไฟล์");
     }
 }
-
+?>
 
 
 
