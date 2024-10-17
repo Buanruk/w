@@ -191,7 +191,7 @@ if (isset($_POST['Submit'])) {
         $idauto = mysqli_insert_id($conn); // ดึง ID ล่าสุดที่ถูกเพิ่ม
 
  // คัดลอกไฟล์ไปยังที่เก็บที่ต้องการ
-        if (copy($_FILES['pimg']['tmp_name'], "images/" . $new_file_name)) {
+        if (move_uploaded_file($_FILES['pimg']['tmp_name'], "images/" . $new_file_name)) {
             echo "<script>";
             echo "alert('เพิ่มข้อมูลสินค้าสำเร็จ');";
             echo "window.location='indexproduct.php';";
