@@ -133,14 +133,25 @@ if ($product_id > 0) {
             <!-- Bootstrap Carousel สำหรับเลื่อนรูปภาพ -->
 <div id="productCarousel" class="carousel slide mt-3" data-bs-ride="carousel">
     <div class="carousel-inner">
-        <?php foreach ($product_images as $index => $image): ?>
-            <div class="carousel-item <?= $index === 0 ? 'active' : '' ?>">
-                <img src="images/<?= htmlspecialchars($image['p_picture']) ?>" 
+        <?php
+        // ตรวจสอบว่ามีรูปภาพจาก product_images หรือไม่
+        if (!empty($product_images)): 
+            foreach ($product_images as $index => $image): ?>
+                <div class="carousel-item <?= $index === 0 ? 'active' : '' ?>">
+                    <img src="images/<?= htmlspecialchars($image['p_picture']) ?>" 
+                         class="d-block w-100" 
+                         alt="<?= htmlspecialchars($product['p_name']) ?>" 
+                         style="height: 400px; object-fit: cover;">
+                </div>
+            <?php endforeach; 
+        else: ?>
+            <div class="carousel-item active">
+                <img src="images/<?= htmlspecialchars($product['p_picture']) ?>" 
                      class="d-block w-100" 
                      alt="<?= htmlspecialchars($product['p_name']) ?>" 
                      style="height: 400px; object-fit: cover;">
             </div>
-        <?php endforeach; ?>
+        <?php endif; ?>
     </div>
 
     <!-- ปุ่มเลื่อนซ้าย-ขวา -->
