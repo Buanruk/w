@@ -1,5 +1,6 @@
 <?php
 session_start(); // เริ่มต้น session
+include("connectdb.php");
 
 // เชื่อมต่อกับฐานข้อมูล
 $conn = new mysqli('localhost', 'root', '', 'shop1');
