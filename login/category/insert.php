@@ -4,7 +4,7 @@
     // เชื่อมต่อฐานข้อมูล
     $servername = "localhost";
     $username = "root"; 
-    $password = ""; 
+    $password = "123456789"; 
     $dbname = "shop1"; 
 
     // สร้างการเชื่อมต่อ
