@@ -19,7 +19,8 @@ foreach ($_SESSION['sid'] as $pid) {
 }
 
 // เพิ่มข้อมูลการสั่งซื้อเข้าตาราง orders
-$sql = "INSERT INTO `orders` (ototal, odate, u_id, u_name) VALUES('$total', CURRENT_TIMESTAMP, '$uid', '$u_name');";
+$address = $_POST['address']; // หรือดึงค่าจากที่อื่น
+$sql = "INSERT INTO `orders` (ototal, odate, u_id, u_name, address) VALUES('$total', CURRENT_TIMESTAMP, '$uid', '$u_name', '$address');";
 if (mysqli_query($conn, $sql)) {
     $id = mysqli_insert_id($conn); // ดึง id ของ orders
     
