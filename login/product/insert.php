@@ -173,59 +173,68 @@
 
 
 </form>
-<?php   
+<?php
+include_once("checklogin.php");
 include_once("connectdb.php");
 
 if (isset($_POST['Submit'])) {
-    $ptname = $_POST['ptname'];
-
-    // คำสั่ง SQL สำหรับเพิ่มข้อมูลประเภทสินค้า
-    $sql_insert = "INSERT INTO product_type (pt_name) VALUES (?)";
+    // ตรวจสอบว่าข้อมูลทั้งหมดถูกส่งมาหรือไม่
+    $pname = $_POST['pname'];
+    $pdetail = $_POST['pdetail'];
+    $pprice = $_POST['pprice'];
+    $pcat = $_POST['pcat'];
+    
+    // ตรวจสอบว่ามีการกรอกข้อมูลหรือไม่
+    if (empty($pname) || empty($pprice) || empty($pcat)) {
+        echo "<script>alert('กรุณากรอกข้อมูลให้ครบถ้วน'); window.location='indexproduct.php';</script>";
+        exit;
+    }
+    
+    // SQL สำหรับการเพิ่มข้อมูลสินค้า
+    $sql_insert = "INSERT INTO product (p_name, p_detail, p_price, pt_id) VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($sql_insert);
-    $stmt->bind_param("s", $ptname);
-
+    $stmt->bind_param("ssdi", $pname, $pdetail, $pprice, $pcat); // d = double, s = string, i = integer
+    
     if ($stmt->execute()) {
-        $pt_id = $stmt->insert_id;  // ตารางมีคอลัมน์เป็น AUTO_INCREMENT
+        $p_id = $stmt->insert_id; // รับ p_id จากการ INSERT
 
-        // ตรวจสอบการอัปโหลดไฟล์รูปภาพ
-        $image_uploaded = $_FILES['pimg']['name'] != "";
-
-        if ($image_uploaded) {
-            // ตรวจสอบประเภทไฟล์ที่อัปโหลด
+        // ตรวจสอบการอัปโหลดไฟล์
+        if (isset($_FILES['pimg']) && $_FILES['pimg']['name'] != "") {
+            // ตรวจสอบประเภทไฟล์
             $allowed = ['gif', 'png', 'jpg', 'jpeg', 'jfif'];
             $filename = $_FILES['pimg']['name'];
             $picture_ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
             if (!in_array($picture_ext, $allowed)) {
-                echo "<script>alert('แก้ไขข้อมูลสินค้าไม่สำเร็จ! ไฟล์รูปต้องเป็น jpg, gif หรือ png เท่านั้น');</script>";
+                echo "<script>alert('ไฟล์รูปต้องเป็น jpg, gif หรือ png เท่านั้น'); window.location='indexproduct.php';</script>";
                 exit;
             }
 
-            // สร้างชื่อไฟล์ใหม่สำหรับประเภทสินค้า
-            $new_filename = "type" . $pt_id . "." . $picture_ext;
+            // สร้างชื่อไฟล์ใหม่
+            $new_filename = "product" . $p_id . "." . $picture_ext;
             $destination_path = "images/" . $new_filename;
 
-            // อัปโหลดไฟล์รูปภาพไปยังโฟลเดอร์ที่กำหนด
+            // ย้ายไฟล์ไปยังโฟลเดอร์ที่ต้องการ
             if (move_uploaded_file($_FILES['pimg']['tmp_name'], $destination_path)) {
-                // คำสั่ง SQL สำหรับอัปเดตข้อมูลรูปภาพในฐานข้อมูล
-                $sql_update = "UPDATE product_type SET t_picture = ? WHERE pt_id = ?";
+                // SQL สำหรับอัปเดตรูปภาพ
+                $sql_update = "UPDATE product SET p_picture = ? WHERE p_id = ?";
                 $stmt_update = $conn->prepare($sql_update);
-                $stmt_update->bind_param("si", $new_filename, $pt_id);
-
+                $stmt_update->bind_param("si", $new_filename, $p_id);
+                
                 if ($stmt_update->execute()) {
-                    echo "<script>alert('เพิ่มข้อมูลประเภทสินค้าสำเร็จ'); window.location='a-type.php';</script>";
+                    echo "<script>alert('เพิ่มข้อมูลสินค้าเรียบร้อย'); window.location='indexproduct.php';</script>";
                 } else {
-                    echo "<script>alert('เกิดข้อผิดพลาดในการบันทึกข้อมูลในฐานข้อมูล');</script>";
+                    echo "<script>alert('เกิดข้อผิดพลาดในการบันทึกข้อมูลรูปภาพ'); window.location='indexproduct.php';</script>";
                 }
                 $stmt_update->close();
             } else {
-                echo "<script>alert('เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ');</script>";
+                echo "<script>alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์'); window.location='indexproduct.php';</script>";
             }
         } else {
-            echo "<script>alert('เพิ่มข้อมูลประเภทสินค้าสำเร็จ'); window.location='a-type.php';</script>";
+            echo "<script>alert('เพิ่มข้อมูลสินค้าสำเร็จโดยไม่มีการอัปโหลดรูปภาพ'); window.location='indexproduct.php';</script>";
         }
     } else {
-        echo "<script>alert('เพิ่มข้อมูลประเภทสินค้าไม่สำเร็จ');</script>";
+        echo "<script>alert('เกิดข้อผิดพลาดในการเพิ่มข้อมูลสินค้า'); window.location='indexproduct.php';</script>";
     }
 
     $stmt->close();
@@ -234,12 +243,6 @@ if (isset($_POST['Submit'])) {
 mysqli_close($conn);
 ?>
 
-
-
-
-<?php	
-	mysqli_close($conn);
-?>
 
 <script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
 </body>
