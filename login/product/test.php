@@ -180,6 +180,7 @@ if (isset($_POST['Submit'])) {
         $file_name = $_FILES['pimg']['name'];
         $ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION)); // ดึงนามสกุลไฟล์
 
+        // ตรวจสอบประเภทไฟล์
         if (!in_array($ext, $allowed_types)) {
             die("ประเภทไฟล์ไม่ถูกต้อง กรุณาอัปโหลดไฟล์ JPG, JPEG, PNG, หรือ GIF เท่านั้น");
         }
@@ -192,22 +193,26 @@ if (isset($_POST['Submit'])) {
         // สร้างชื่อไฟล์ใหม่เพื่อหลีกเลี่ยงการซ้ำกัน
         $new_file_name = uniqid() . '.' . $ext;
 
-        // สร้าง SQL สำหรับเพิ่มข้อมูลสินค้าใหม่ลงในฐานข้อมูล
+        // คำสั่ง SQL สำหรับเพิ่มข้อมูลสินค้าใหม่ลงในฐานข้อมูล
         $sql_insert = "INSERT INTO product (p_name, p_detail, p_price, p_picture, pt_id) 
                        VALUES (
                            '{$_POST['pname']}', 
                            '{$_POST['pdetail']}', 
                            '{$_POST['pprice']}', 
                            '{$new_file_name}', 
-                           '{$_POST['pt']}'
+                           '{$_POST['pcat']}'
                        );";
         
+        // ตรวจสอบการ query และเพิ่มข้อมูลลงในฐานข้อมูล
         if (mysqli_query($conn, $sql_insert)) {
             // รับ p_id ที่เพิ่งถูกสร้างใหม่
             $p_id = mysqli_insert_id($conn);
 
             // ย้ายไฟล์ไปยังโฟลเดอร์ที่ต้องการเก็บ
-            if (move_uploaded_file($_FILES['pimg']['tmp_name'], "../login/product/images/" . $new_file_name)) {
+            $target_dir = "../login/product/images/";  // กำหนดตำแหน่งที่จัดเก็บไฟล์
+            $target_file = $target_dir . $new_file_name;
+
+            if (move_uploaded_file($_FILES['pimg']['tmp_name'], $target_file)) {
                 echo "<script>";
                 echo "alert('เพิ่มข้อมูลสินค้าสำเร็จ');";
                 echo "window.location='indexproduct.php';";
@@ -216,13 +221,14 @@ if (isset($_POST['Submit'])) {
                 die("คัดลอกไฟล์ไม่สำเร็จ");
             }
         } else {
-            die("เพิ่มข้อมูลสินค้าไม่ได้");
+            die("เพิ่มข้อมูลสินค้าไม่ได้: " . mysqli_error($conn));
         }
     } else {
         die("เกิดข้อผิดพลาดในการอัปโหลดไฟล์");
     }
 }
 ?>
+
 
 <?php	
 	mysqli_close($conn);
