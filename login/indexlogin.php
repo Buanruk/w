@@ -130,7 +130,7 @@
        <button class="btn btn-primary w-100 py-2" type="submit" name="Submit">เข้าสู่ระบบ</button> 
        <div class="container-fluid-start my-3">
            <div class="container-fluid-start my-3 text-start">
-    <a class="navbar-brand" href="/k/U/UI.php" style="color: black; text-decoration: none;">Go Home</a>
+    <a class="navbar-brand" href="/w/U/UI.php" style="color: black; text-decoration: none;">Go Home</a>
 
 </div>
         </div>
