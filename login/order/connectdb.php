@@ -1,7 +1,7 @@
 <?php
     $host="localhost";
 	$usr="root";
-	$pwd="";
+	$pwd="123456789";
 	$db= "shop1";
 	
 
