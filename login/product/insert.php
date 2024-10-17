@@ -173,51 +173,67 @@
 
 
 </form>
-<?php
+<?php   
+include_once("connectdb.php");
+
 if (isset($_POST['Submit'])) {
+    $ptname = $_POST['ptname'];
 
-    // ตรวจสอบว่ามีการอัปโหลดไฟล์
-    if (isset($_FILES['pimg']) && $_FILES['pimg']['error'] == UPLOAD_ERR_OK) {
+    // คำสั่ง SQL สำหรับเพิ่มข้อมูลประเภทสินค้า
+    $sql_insert = "INSERT INTO product_type (pt_name) VALUES (?)";
+    $stmt = $conn->prepare($sql_insert);
+    $stmt->bind_param("s", $ptname);
 
-        // ตรวจสอบประเภทของไฟล์ (อนุญาตเฉพาะรูปภาพ)
-        $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
-        $file_name = $_FILES['pimg']['name'];
-        $ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION)); // ดึงนามสกุลไฟล์
+    if ($stmt->execute()) {
+        $pt_id = $stmt->insert_id;  // ตารางมีคอลัมน์เป็น AUTO_INCREMENT
 
-        if (!in_array($ext, $allowed_types)) {
-            die("ประเภทไฟล์ไม่ถูกต้อง กรุณาอัปโหลดไฟล์ JPG, JPEG, PNG, หรือ GIF เท่านั้น");
-        }
+        // ตรวจสอบการอัปโหลดไฟล์รูปภาพ
+        $image_uploaded = $_FILES['pimg']['name'] != "";
 
-        // ตรวจสอบขนาดของไฟล์ (ไม่เกิน 5MB)
-        if ($_FILES['pimg']['size'] > 5000000) {
-            die("ไฟล์มีขนาดใหญ่เกินไป กรุณาอัปโหลดไฟล์ที่มีขนาดไม่เกิน 5MB");
-        }
+        if ($image_uploaded) {
+            // ตรวจสอบประเภทไฟล์ที่อัปโหลด
+            $allowed = ['gif', 'png', 'jpg', 'jpeg', 'jfif'];
+            $filename = $_FILES['pimg']['name'];
+            $picture_ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
-        // สร้างชื่อไฟล์ใหม่เพื่อหลีกเลี่ยงการซ้ำกัน
-        $new_file_name = uniqid() . '.' . $ext;
+            if (!in_array($picture_ext, $allowed)) {
+                echo "<script>alert('แก้ไขข้อมูลสินค้าไม่สำเร็จ! ไฟล์รูปต้องเป็น jpg, gif หรือ png เท่านั้น');</script>";
+                exit;
+            }
 
-        // คำสั่ง SQL เพื่อเพิ่มข้อมูลสินค้า
-        $sql = "INSERT INTO `product` ( `p_name`, `p_detail`, `p_price`, `p_picture`, `pt_id`) 
-                VALUES ( '{$_POST['pname']}', '{$_POST['pdetail']}', '{$_POST['pprice']}', '{$new_file_name}', '{$_POST['pcat']}');";
-        mysqli_query($conn, $sql) or die("เพิ่มข้อมูลสินค้าไม่ได้");
+            // สร้างชื่อไฟล์ใหม่สำหรับประเภทสินค้า
+            $new_filename = "type" . $pt_id . "." . $picture_ext;
+            $destination_path = "images/" . $new_filename;
 
-        // ดึง ID ล่าสุดที่ถูกเพิ่ม
-        $idauto = mysqli_insert_id($conn);
+            // อัปโหลดไฟล์รูปภาพไปยังโฟลเดอร์ที่กำหนด
+            if (move_uploaded_file($_FILES['pimg']['tmp_name'], $destination_path)) {
+                // คำสั่ง SQL สำหรับอัปเดตข้อมูลรูปภาพในฐานข้อมูล
+                $sql_update = "UPDATE product_type SET t_picture = ? WHERE pt_id = ?";
+                $stmt_update = $conn->prepare($sql_update);
+                $stmt_update->bind_param("si", $new_filename, $pt_id);
 
-        // ย้ายไฟล์ไปยังโฟลเดอร์ที่ต้องการเก็บ
-        if (move_uploaded_file($_FILES['pimg']['tmp_name'], "images/" . $new_file_name)) {
-            echo "<script>";
-            echo "alert('เพิ่มข้อมูลสินค้าสำเร็จ');";
-            echo "window.location='indexproduct.php';";
-            echo "</script>";
+                if ($stmt_update->execute()) {
+                    echo "<script>alert('เพิ่มข้อมูลประเภทสินค้าสำเร็จ'); window.location='a-type.php';</script>";
+                } else {
+                    echo "<script>alert('เกิดข้อผิดพลาดในการบันทึกข้อมูลในฐานข้อมูล');</script>";
+                }
+                $stmt_update->close();
+            } else {
+                echo "<script>alert('เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ');</script>";
+            }
         } else {
-            die("คัดลอกไฟล์ไม่สำเร็จ");
+            echo "<script>alert('เพิ่มข้อมูลประเภทสินค้าสำเร็จ'); window.location='a-type.php';</script>";
         }
     } else {
-        die("เกิดข้อผิดพลาดในการอัปโหลดไฟล์");
+        echo "<script>alert('เพิ่มข้อมูลประเภทสินค้าไม่สำเร็จ');</script>";
     }
+
+    $stmt->close();
 }
+
+mysqli_close($conn);
 ?>
+
 
 
 
