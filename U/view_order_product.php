@@ -131,14 +131,14 @@ if ($product_id > 0) {
             <h1 class="text-center"><?= htmlspecialchars($product['p_name']) ?></h1>
 
             <!-- Bootstrap Carousel สำหรับเลื่อนรูปภาพ -->
-          <div id="productCarousel" class="carousel slide mt-3" data-bs-ride="carousel">
+<div id="productCarousel" class="carousel slide mt-3" data-bs-ride="carousel">
     <div class="carousel-inner">
         <?php foreach ($product_images as $index => $image): ?>
             <div class="carousel-item <?= $index === 0 ? 'active' : '' ?>">
                 <img src="images/<?= htmlspecialchars($image['p_picture']) ?>" 
                      class="d-block w-100" 
                      alt="<?= htmlspecialchars($product['p_name']) ?>" 
-                     style="height: 400px; object-fit: cover;"> <!-- ปรับขนาดรูปตามที่ต้องการ -->
+                     style="height: 400px; object-fit: cover;">
             </div>
         <?php endforeach; ?>
     </div>
