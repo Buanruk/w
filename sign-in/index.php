@@ -3,7 +3,7 @@ session_start(); // เริ่มต้น session
 include("connectdb.php");
 
 // เชื่อมต่อกับฐานข้อมูล
-$conn = new mysqli('localhost', 'root', '', 'shop1');
+$conn = new mysqli('localhost', 'root', '123456789', 'shop1');
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
