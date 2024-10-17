@@ -192,17 +192,22 @@ if (isset($_POST['Submit'])) {
         // สร้างชื่อไฟล์ใหม่เพื่อหลีกเลี่ยงการซ้ำกัน
         $new_file_name = uniqid() . '.' . $ext;
 
-        // ใช้ prepared statement เพื่อลดความเสี่ยงจาก SQL Injection
-        $stmt = $conn->prepare("INSERT INTO product (p_name, p_detail, p_price, p_picture, pt_id) 
-                                VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssii", $_POST['pname'], $_POST['pdetail'], $_POST['pprice'], $new_file_name, $_POST['pt']);
-
-        if ($stmt->execute()) {
+        // สร้าง SQL สำหรับเพิ่มข้อมูลสินค้าใหม่ลงในฐานข้อมูล
+        $sql_insert = "INSERT INTO product (p_name, p_detail, p_price, p_picture, pt_id) 
+                       VALUES (
+                           '{$_POST['pname']}', 
+                           '{$_POST['pdetail']}', 
+                           '{$_POST['pprice']}', 
+                           '{$new_file_name}', 
+                           '{$_POST['pt']}'
+                       );";
+        
+        if (mysqli_query($conn, $sql_insert)) {
             // รับ p_id ที่เพิ่งถูกสร้างใหม่
-            $p_id = $stmt->insert_id;
+            $p_id = mysqli_insert_id($conn);
 
             // ย้ายไฟล์ไปยังโฟลเดอร์ที่ต้องการเก็บ
-            if (move_uploaded_file($_FILES['pimg']['tmp_name'], "images/" . $new_file_name)) {
+            if (move_uploaded_file($_FILES['pimg']['tmp_name'], "../login/product/images/" . $new_file_name)) {
                 echo "<script>";
                 echo "alert('เพิ่มข้อมูลสินค้าสำเร็จ');";
                 echo "window.location='indexproduct.php';";
@@ -211,9 +216,8 @@ if (isset($_POST['Submit'])) {
                 die("คัดลอกไฟล์ไม่สำเร็จ");
             }
         } else {
-            die("เพิ่มข้อมูลสินค้าไม่ได้: " . $stmt->error);
+            die("เพิ่มข้อมูลสินค้าไม่ได้");
         }
-        $stmt->close();
     } else {
         die("เกิดข้อผิดพลาดในการอัปโหลดไฟล์");
     }
