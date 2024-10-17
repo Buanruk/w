@@ -178,19 +178,33 @@ if (isset($_POST['Submit'])) {
 
     // ตรวจสอบว่ามีการอัปโหลดไฟล์
     if (isset($_FILES['pimg']) && $_FILES['pimg']['error'] == UPLOAD_ERR_OK) {
-        // ชื่อไฟล์ที่อัปโหลด
+
+        // ตรวจสอบประเภทของไฟล์ (อนุญาตเฉพาะรูปภาพ)
+        $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
         $file_name = $_FILES['pimg']['name'];
-        $ext = pathinfo($file_name, PATHINFO_EXTENSION); // ดึงนามสกุลไฟล์
-        $new_file_name = uniqid() . '.' . $ext; // สร้างชื่อไฟล์ใหม่เพื่อหลีกเลี่ยงการซ้ำกัน
+        $ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION)); // ดึงนามสกุลไฟล์
+
+        if (!in_array($ext, $allowed_types)) {
+            die("ประเภทไฟล์ไม่ถูกต้อง กรุณาอัปโหลดไฟล์ JPG, JPEG, PNG, หรือ GIF เท่านั้น");
+        }
+
+        // ตรวจสอบขนาดของไฟล์ (ไม่เกิน 5MB)
+        if ($_FILES['pimg']['size'] > 5000000) {
+            die("ไฟล์มีขนาดใหญ่เกินไป กรุณาอัปโหลดไฟล์ที่มีขนาดไม่เกิน 5MB");
+        }
+
+        // สร้างชื่อไฟล์ใหม่เพื่อหลีกเลี่ยงการซ้ำกัน
+        $new_file_name = uniqid() . '.' . $ext;
 
         // คำสั่ง SQL เพื่อเพิ่มข้อมูลสินค้า
         $sql = "INSERT INTO `product` (`p_id`, `p_name`, `p_detail`, `p_price`, `p_picture`, `pt_id`) 
                 VALUES (NULL, '{$_POST['pname']}', '{$_POST['pdetail']}', '{$_POST['pprice']}', '{$new_file_name}', '{$_POST['pcat']}');";
         mysqli_query($conn, $sql) or die("เพิ่มข้อมูลสินค้าไม่ได้");
 
-        $idauto = mysqli_insert_id($conn); // ดึง ID ล่าสุดที่ถูกเพิ่ม
+        // ดึง ID ล่าสุดที่ถูกเพิ่ม
+        $idauto = mysqli_insert_id($conn);
 
- // คัดลอกไฟล์ไปยังที่เก็บที่ต้องการ
+        // ย้ายไฟล์ไปยังโฟลเดอร์ที่ต้องการเก็บ
         if (move_uploaded_file($_FILES['pimg']['tmp_name'], "images/" . $new_file_name)) {
             echo "<script>";
             echo "alert('เพิ่มข้อมูลสินค้าสำเร็จ');";
@@ -204,6 +218,7 @@ if (isset($_POST['Submit'])) {
     }
 }
 ?>
+
 
 
 <?php	
