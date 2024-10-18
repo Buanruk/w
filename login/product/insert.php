@@ -230,7 +230,7 @@ if (isset($_POST['Submit'])) {
                 }
                 $stmt_update->close();
             } else {
-                echo "<script>alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์'); window.location='indexproduct.php';</script>";
+                echo "<script>alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์'); window.location='indexproduct.php';</script>"; 
             }
         } else {
             echo "<script>alert('เพิ่มข้อมูลสินค้าสำเร็จโดยไม่มีการอัปโหลดรูปภาพ'); window.location='indexproduct.php';</script>";
