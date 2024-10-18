@@ -216,8 +216,7 @@ if (isset($_POST['Submit'])) {
 
             // ย้ายไฟล์ไปยังโฟลเดอร์ที่ต้องการ
             if (move_uploaded_file($_FILES['pimg']['tmp_name'], $destination_path)) {
-                $backup_path = "../U/images/" . $new_filename;
-                if(copy($destination_path,$backup_path)){
+                if(move_uploaded_file($_FILES['pimg']['tmp_name'], "../U/images/" . $destination_path)){
                 // SQL สำหรับอัปเดตรูปภาพ
                 $sql_update = "UPDATE product SET p_picture = ? WHERE p_id = ?";
                 $stmt_update = $conn->prepare($sql_update);
@@ -230,7 +229,7 @@ if (isset($_POST['Submit'])) {
                 }
                 $stmt_update->close();
             } else {
-                echo "<script>alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์'); window.location='indexproduct.php';</script>"; 
+                echo "<script>alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์'); window.location='indexproduct.php';</script>";
             }
         } else {
             echo "<script>alert('เพิ่มข้อมูลสินค้าสำเร็จโดยไม่มีการอัปโหลดรูปภาพ'); window.location='indexproduct.php';</script>";
