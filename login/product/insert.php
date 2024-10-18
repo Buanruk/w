@@ -213,7 +213,7 @@ if (isset($_POST['Submit'])) {
             // สร้างชื่อไฟล์ใหม่
             $new_filename = "product" . $p_id . "." . $picture_ext;
             $destination_path = "images/" . $new_filename;
-            
+            $destination_path_2 = "../U/images/" . $new_filename
             
 
             // ย้ายไฟล์ไปยังโฟลเดอร์ที่ต้องการ
