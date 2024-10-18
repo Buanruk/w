@@ -257,7 +257,7 @@ if (move_uploaded_file($source_path, $destination_path_1)) {
 }
 
     $stmt->close();
-}}
+}}}
 
 mysqli_close($conn);
 ?>
