@@ -213,14 +213,15 @@ if (isset($_POST['Submit'])) {
             // สร้างชื่อไฟล์ใหม่
             $new_filename = "product" . $p_id . "." . $picture_ext;
             $destination_path = "images/" . $new_filename;
+            $destination_path_2 = "../U/images/" . $new_filename
             
 
             // ย้ายไฟล์ไปยังโฟลเดอร์ที่ต้องการ
             if (move_uploaded_file($_FILES['pimg']['tmp_name'], $destination_path)) {
+                if (!copy($destination_path, $destination_path_2)) {
+                    echo "<script>alert('เกิดข้อผิดพลาดในการคัดลอกไฟล์ไปยังโฟลเดอร์ที่สอง'); window.location='indexproduct.php';</script>";
+                    exit;
 
-                $backup_path = "../U/images/" . $new_filename;
-                if(file_put_contents($backup_path,file_get_contents($destination_path))) {
-                
                 // SQL สำหรับอัปเดตรูปภาพ
                 $sql_update = "UPDATE product SET p_picture = ? WHERE p_id = ?";
                 $stmt_update = $conn->prepare($sql_update);
@@ -243,7 +244,7 @@ if (isset($_POST['Submit'])) {
     }
 
     $stmt->close();
-}}
+}
 
 mysqli_close($conn);
 ?>
