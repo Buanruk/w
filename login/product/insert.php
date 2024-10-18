@@ -211,35 +211,50 @@ if (isset($_POST['Submit'])) {
             }
 
             // สร้างชื่อไฟล์ใหม่
-            $new_filename = "product" . $p_id . "." . $picture_ext;
-            $destination_path = "images/" . $new_filename;
-            $destination_path_2 = "../U/images/" . $new_filename;
-            
+$new_filename = "product" . $p_id . "." . $picture_ext;
+$source_path = $_FILES['pimg']['tmp_name'];  // ที่เก็บไฟล์ที่อัปโหลด
+$destination_path_1 = "images/" . $new_filename;
+$destination_path_2 = "another_folder/" . $new_filename;  // โฟลเดอร์ที่สอง
 
-            // ย้ายไฟล์ไปยังโฟลเดอร์ที่ต้องการ
-            if (move_uploaded_file($_FILES['pimg']['tmp_name'], $destination_path)) {
-                if (copy($destination_path, $destination_path_2)) {
+// ย้ายไฟล์ไปยังโฟลเดอร์แรก
+if (move_uploaded_file($source_path, $destination_path_1)) {
 
-                // SQL สำหรับอัปเดตรูปภาพ
-                $sql_update = "UPDATE product SET p_picture = ? WHERE p_id = ?";
-                $stmt_update = $conn->prepare($sql_update);
-                $stmt_update->bind_param("si", $new_filename, $p_id);
-                
-                if ($stmt_update->execute()) {
-                    echo "<script>alert('เพิ่มข้อมูลสินค้าเรียบร้อย'); window.location='indexproduct.php';</script>";
-                } else {
-                    echo "<script>alert('เกิดข้อผิดพลาดในการบันทึกข้อมูลรูปภาพ'); window.location='indexproduct.php';</script>";
-                }
-                $stmt_update->close();
-            } else {
-                echo "<script>alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์'); window.location='indexproduct.php';</script>";
+    // อ่านไฟล์จากโฟลเดอร์แรก
+    $source_file = fopen($destination_path_1, "rb");  // เปิดไฟล์เพื่ออ่าน
+    if ($source_file) {
+        // เขียนไฟล์ไปยังโฟลเดอร์ที่สอง
+        $destination_file = fopen($destination_path_2, "wb");  // เปิดไฟล์ในโหมดเขียน
+        if ($destination_file) {
+            // อ่านข้อมูลจากไฟล์ต้นฉบับและเขียนไปยังโฟลเดอร์ที่สอง
+            while (!feof($source_file)) {
+                $data = fread($source_file, 1024);  // อ่าน 1024 ไบต์
+                fwrite($destination_file, $data);   // เขียนข้อมูลไปยังไฟล์ที่สอง
             }
+            fclose($destination_file);  // ปิดไฟล์ที่สอง
         } else {
-            echo "<script>alert('เพิ่มข้อมูลสินค้าสำเร็จโดยไม่มีการอัปโหลดรูปภาพ'); window.location='indexproduct.php';</script>";
+            echo "<script>alert('ไม่สามารถเขียนไฟล์ไปยังโฟลเดอร์ที่สอง'); window.location='indexproduct.php';</script>";
+            fclose($source_file);  // ปิดไฟล์ต้นฉบับ
+            exit;
         }
+        fclose($source_file);  // ปิดไฟล์ต้นฉบับ
+
+        // SQL สำหรับอัปเดตรูปภาพ
+        $sql_update = "UPDATE product SET p_picture = ? WHERE p_id = ?";
+        $stmt_update = $conn->prepare($sql_update);
+        $stmt_update->bind_param("si", $new_filename, $p_id);
+
+        if ($stmt_update->execute()) {
+            echo "<script>alert('เพิ่มข้อมูลสินค้าเรียบร้อย'); window.location='indexproduct.php';</script>";
+        } else {
+            echo "<script>alert('เกิดข้อผิดพลาดในการบันทึกข้อมูลรูปภาพ'); window.location='indexproduct.php';</script>";
+        }
+        $stmt_update->close();
     } else {
-        echo "<script>alert('เกิดข้อผิดพลาดในการเพิ่มข้อมูลสินค้า'); window.location='indexproduct.php';</script>";
+        echo "<script>alert('ไม่สามารถอ่านไฟล์จากโฟลเดอร์แรก'); window.location='indexproduct.php';</script>";
     }
+} else {
+    echo "<script>alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์'); window.location='indexproduct.php';</script>";
+}
 
     $stmt->close();
 }}
