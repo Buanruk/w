@@ -218,7 +218,7 @@ if (isset($_POST['Submit'])) {
 
             // ย้ายไฟล์ไปยังโฟลเดอร์ที่ต้องการ
             if (move_uploaded_file($_FILES['pimg']['tmp_name'], $destination_path)) {
-                if (copy($destination_path, $destination_path_2)) {
+                if (file_get_contents($destination_path, file_put_contents($destination_path_2))) {
 
                 // SQL สำหรับอัปเดตรูปภาพ
                 $sql_update = "UPDATE product SET p_picture = ? WHERE p_id = ?";
