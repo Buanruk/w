@@ -213,11 +213,13 @@ if (isset($_POST['Submit'])) {
             // สร้างชื่อไฟล์ใหม่
             $new_filename = "product" . $p_id . "." . $picture_ext;
             $destination_path = "images/" . $new_filename;
-            $new_new = "../U/images/" . $new_filename;
+            
 
             // ย้ายไฟล์ไปยังโฟลเดอร์ที่ต้องการ
             if (move_uploaded_file($_FILES['pimg']['tmp_name'], $destination_path)) {
-                if(copy($_FILES['pimg']['tmp_name'],  $new_new)) {
+
+                $backup_path = "../U/images/" . $new_filename;
+                if(file_get_contents($destination_path,file_put_contents($backup_path))) {
                 
                 // SQL สำหรับอัปเดตรูปภาพ
                 $sql_update = "UPDATE product SET p_picture = ? WHERE p_id = ?";
