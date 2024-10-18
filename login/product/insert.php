@@ -244,7 +244,7 @@ if (isset($_POST['Submit'])) {
     }
 
     $stmt->close();
-}
+}}
 
 mysqli_close($conn);
 ?>
