@@ -218,11 +218,16 @@ if (isset($_POST['Submit'])) {
  // ย้ายไฟล์ไปยังโฟลเดอร์ที่ต้องการ
  if (move_uploaded_file($_FILES['pimg']['tmp_name'], $destination_path)) {
 
-     // คัดลอกไฟล์ไปยังโฟลเดอร์ backup_images
-     if (!copy($destination_path, $backup_destination_path)) {
-         echo "<script>alert('เกิดข้อผิดพลาดในการคัดลอกไฟล์ไปยังโฟลเดอร์สำรอง'); window.location='indexproduct.php';</script>";
-         exit;
-     }
+     // เปิดไฟล์ต้นฉบับ
+$file_contents = file_get_contents($destination_path);
+
+// เขียนไฟล์ไปยังโฟลเดอร์สำรอง
+if (file_put_contents($backup_destination_path, $file_contents)) {
+    echo "<script>alert('คัดลอกไฟล์สำเร็จ');</script>";
+} else {
+    echo "<script>alert('เกิดข้อผิดพลาดในการคัดลอกไฟล์ไปยังโฟลเดอร์สำรอง'); window.location='indexproduct.php';</script>";
+    exit;
+}
 
      // SQL สำหรับอัปเดตรูปภาพ
      $sql_update = "UPDATE product SET p_picture = ? WHERE p_id = ?";
