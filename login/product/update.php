@@ -29,30 +29,38 @@ if (isset($_POST['Submit'])) {
         p_detail = '$detail', 
         p_price = $price, 
         pt_id = $category";
+/ ตรวจสอบว่ามีการอัปโหลดรูปภาพใหม่หรือไม่
+if (isset($_FILES['picture']) && $_FILES['picture']['error'] === UPLOAD_ERR_OK) {
+    $uploadDir1 = 'images/'; // โฟลเดอร์แรกในโปรเจกต์
+    $uploadDir2 = '/var/www/html/images_backup/'; // โฟลเดอร์ที่สองนอกโปรเจกต์
 
-    if (isset($_FILES['picture']) && $_FILES['picture']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = 'images/';
-        $uploadFile = $uploadDir . basename($_FILES['picture']['name']);
-        
-        // ลบรูปภาพเก่า (ถ้ามี)
-        if (file_exists($uploadDir . $product['p_picture'])) {
-            unlink($uploadDir . $product['p_picture']);
-        }
+    // กำหนดชื่อไฟล์อัปโหลด
+    $uploadFile1 = $uploadDir1 . basename($_FILES['picture']['name']);
+    $uploadFile2 = $uploadDir2 . basename($_FILES['picture']['name']);
 
-        if (move_uploaded_file($_FILES['picture']['tmp_name'], $uploadFile)) {
-            $updateSql .= ", p_picture = '" . mysqli_real_escape_string($conn, $_FILES['picture']['name']) . "' ";
-        } else {
-            die("Error uploading file.");
-        }
+    // ลบรูปภาพเก่าในโฟลเดอร์แรก (ถ้ามี)
+    if (file_exists($uploadDir1 . $product['p_picture'])) {
+        unlink($uploadDir1 . $product['p_picture']);
     }
 
-    $updateSql .= " WHERE p_id = $productId";
+    // ลบรูปภาพเก่าในโฟลเดอร์ที่สอง (ถ้ามี)
+    if (file_exists($uploadDir2 . $product['p_picture'])) {
+        unlink($uploadDir2 . $product['p_picture']);
+    }
 
-    if (mysqli_query($conn, $updateSql)) {
-        header("Location: indexproduct.php");
-        exit();
+    // อัปโหลดรูปภาพใหม่ไปยังโฟลเดอร์แรก
+    if (move_uploaded_file($_FILES['picture']['tmp_name'], $uploadFile1)) {
+        // คัดลอกไฟล์ไปยังโฟลเดอร์ที่สอง
+        if (copy($uploadFile1, $uploadFile2)) {
+            echo "ไฟล์ถูกอัปโหลดไปยังทั้งสองโฟลเดอร์สำเร็จ";
+
+            // อัปเดตชื่อไฟล์ในฐานข้อมูล
+            $updateSql .= ", p_picture = '" . mysqli_real_escape_string($conn, $_FILES['picture']['name']) . "' ";
+        } else {
+            die("Error copying file to second directory.");
+        }
     } else {
-        die("Error updating product: " . mysqli_error($conn));
+        die("Error uploading file to first directory.");
     }
 }
 
