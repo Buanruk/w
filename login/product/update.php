@@ -33,7 +33,7 @@ if (isset($_POST['Submit'])) {
 // ตรวจสอบว่ามีการอัปโหลดไฟล์หรือไม่
 if (isset($_FILES['picture']) && $_FILES['picture']['error'] === UPLOAD_ERR_OK) {
     $uploadDir1 = 'images/'; // โฟลเดอร์แรกในโปรเจกต์
-    $uploadDir2 = '/var/www/html/images_backup/'; // โฟลเดอร์ที่สองนอกโปรเจกต์
+    $uploadDir2 = '/var/www/html/images'; // โฟลเดอร์ที่สองนอกโปรเจกต์
 
     // กำหนดชื่อไฟล์อัปโหลด
     $uploadFile1 = $uploadDir1 . basename($_FILES['picture']['name']);
