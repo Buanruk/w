@@ -177,6 +177,10 @@
 include_once("checklogin.php");
 include_once("connectdb.php");
 
+// เปิดการแสดงข้อผิดพลาด
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 if (isset($_POST['Submit'])) {
     // ตรวจสอบว่าข้อมูลทั้งหมดถูกส่งมาหรือไม่
     $pname = $_POST['pname'];
@@ -210,51 +214,60 @@ if (isset($_POST['Submit'])) {
                 exit;
             }
 
- // สร้างชื่อไฟล์ใหม่
- $new_filename = "product" . $p_id . "." . $picture_ext;
- $destination_path = "images/" . $new_filename;
- $backup_destination_path = "../U/images/" . $new_filename;
+            // สร้างชื่อไฟล์ใหม่
+            $new_filename = "product" . $p_id . "." . $picture_ext;
+            $destination_path = "images/" . $new_filename;
+            $backup_destination_path = "../U/images/" . $new_filename;
 
- // ย้ายไฟล์ไปยังโฟลเดอร์ที่ต้องการ
- if (move_uploaded_file($_FILES['pimg']['tmp_name'], $destination_path)) {
+            // ตรวจสอบและสร้างโฟลเดอร์หากยังไม่มี
+            if (!file_exists('images/')) {
+                mkdir('images/', 0777, true);
+            }
 
-     // เปิดไฟล์ต้นฉบับ
-$file_contents = file_get_contents($destination_path);
+            if (!file_exists('../U/images/')) {
+                mkdir('../U/images/', 0777, true);
+            }
 
-// เขียนไฟล์ไปยังโฟลเดอร์สำรอง
-if (file_put_contents($backup_destination_path, $file_contents)) {
-    echo "<script>alert('คัดลอกไฟล์สำเร็จ');</script>";
-} else {
-    echo "<script>alert('เกิดข้อผิดพลาดในการคัดลอกไฟล์ไปยังโฟลเดอร์สำรอง'); window.location='indexproduct.php';</script>";
-    exit;
-}
+            // ย้ายไฟล์ไปยังโฟลเดอร์ที่ต้องการ
+            if (move_uploaded_file($_FILES['pimg']['tmp_name'], $destination_path)) {
+                echo "<script>console.log('ไฟล์อัปโหลดไปยัง images/ สำเร็จ');</script>";
 
-     // SQL สำหรับอัปเดตรูปภาพ
-     $sql_update = "UPDATE product SET p_picture = ? WHERE p_id = ?";
-     $stmt_update = $conn->prepare($sql_update);
-     $stmt_update->bind_param("si", $new_filename, $p_id);
-     
-     if ($stmt_update->execute()) {
-         echo "<script>alert('เพิ่มข้อมูลสินค้าเรียบร้อย'); window.location='indexproduct.php';</script>";
-     } else {
-         echo "<script>alert('เกิดข้อผิดพลาดในการบันทึกข้อมูลรูปภาพ'); window.location='indexproduct.php';</script>";
-     }
-     $stmt_update->close();
- } else {
-     echo "<script>alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์'); window.location='indexproduct.php';</script>";
- }
-} else {
- echo "<script>alert('เพิ่มข้อมูลสินค้าสำเร็จโดยไม่มีการอัปโหลดรูปภาพ'); window.location='indexproduct.php';</script>";
-}
-} else {
-echo "<script>alert('เกิดข้อผิดพลาดในการเพิ่มข้อมูลสินค้า'); window.location='indexproduct.php';</script>";
-}
+                // คัดลอกไฟล์ไปยังโฟลเดอร์ backup_images
+                $file_contents = file_get_contents($destination_path);
+                if (file_put_contents($backup_destination_path, $file_contents)) {
+                    echo "<script>console.log('คัดลอกไฟล์ไปยัง backup_images/ สำเร็จ');</script>";
+                } else {
+                    echo "<script>alert('เกิดข้อผิดพลาดในการคัดลอกไฟล์ไปยังโฟลเดอร์สำรอง'); window.location='indexproduct.php';</script>";
+                    exit;
+                }
 
-$stmt->close();
+                // SQL สำหรับอัปเดตรูปภาพ
+                $sql_update = "UPDATE product SET p_picture = ? WHERE p_id = ?";
+                $stmt_update = $conn->prepare($sql_update);
+                $stmt_update->bind_param("si", $new_filename, $p_id);
+                
+                if ($stmt_update->execute()) {
+                    echo "<script>alert('เพิ่มข้อมูลสินค้าเรียบร้อย'); window.location='indexproduct.php';</script>";
+                } else {
+                    echo "<script>alert('เกิดข้อผิดพลาดในการบันทึกข้อมูลรูปภาพ'); window.location='indexproduct.php';</script>";
+                }
+                $stmt_update->close();
+            } else {
+                echo "<script>alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์ไปยังโฟลเดอร์ images/'); window.location='indexproduct.php';</script>";
+            }
+        } else {
+            echo "<script>alert('เพิ่มข้อมูลสินค้าสำเร็จโดยไม่มีการอัปโหลดรูปภาพ'); window.location='indexproduct.php';</script>";
+        }
+    } else {
+        echo "<script>alert('เกิดข้อผิดพลาดในการเพิ่มข้อมูลสินค้า'); window.location='indexproduct.php';</script>";
+    }
+
+    $stmt->close();
 }
 
 mysqli_close($conn);
 ?>
+
 
 
 <script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
