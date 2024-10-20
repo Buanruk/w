@@ -30,7 +30,7 @@ if (isset($_POST['Submit'])) {
         p_price = $price, 
         pt_id = $category";
 
-    // ตรวจสอบว่ามีการอัปโหลดรูปภาพใหม่หรือไม่
+// ตรวจสอบว่ามีการอัปโหลดไฟล์หรือไม่
 if (isset($_FILES['picture']) && $_FILES['picture']['error'] === UPLOAD_ERR_OK) {
     $uploadDir1 = 'images/'; // โฟลเดอร์แรกในโปรเจกต์
     $uploadDir2 = '/var/www/html/images_backup/'; // โฟลเดอร์ที่สองนอกโปรเจกต์
@@ -51,21 +51,28 @@ if (isset($_FILES['picture']) && $_FILES['picture']['error'] === UPLOAD_ERR_OK) 
 
     // อัปโหลดรูปภาพใหม่ไปยังโฟลเดอร์แรก
     if (move_uploaded_file($_FILES['picture']['tmp_name'], $uploadFile1)) {
-        // คัดลอกไฟล์ไปยังโฟลเดอร์ที่สอง
-        if (copy($uploadFile1, $uploadFile2)) {
-            echo "ไฟล์ถูกอัปโหลดไปยังทั้งสองโฟลเดอร์สำเร็จ";
+        // ใช้ file_get_contents และ file_put_contents คัดลอกไฟล์ไปยังโฟลเดอร์ที่สอง
+        $fileContents = file_get_contents($uploadFile1); // อ่านข้อมูลจากไฟล์แรก
 
-            // อัปเดตชื่อไฟล์ในฐานข้อมูล
-            $updateSql .= ", p_picture = '" . mysqli_real_escape_string($conn, $_FILES['picture']['name']) . "' ";
+        if ($fileContents !== false) {
+            // เขียนข้อมูลไปยังโฟลเดอร์ที่สอง
+            if (file_put_contents($uploadFile2, $fileContents) !== false) {
+                echo "ไฟล์ถูกอัปโหลดไปยังทั้งสองโฟลเดอร์สำเร็จ";
+
+                // อัปเดตชื่อไฟล์ในฐานข้อมูล
+                $updateSql .= ", p_picture = '" . mysqli_real_escape_string($conn, $_FILES['picture']['name']) . "' ";
+            } else {
+                die("เกิดข้อผิดพลาดในการเขียนไฟล์ไปยังโฟลเดอร์ที่สอง");
+            }
         } else {
-            die("Error copying file to second directory.");
+            die("เกิดข้อผิดพลาดในการอ่านไฟล์จากโฟลเดอร์แรก");
         }
     } else {
-        die("Error uploading file to first directory.");
+        die("เกิดข้อผิดพลาดในการอัปโหลดไฟล์ไปยังโฟลเดอร์แรก");
     }
-}}
-
+}
 ?>
+
 
 <!doctype html>
 <html>
