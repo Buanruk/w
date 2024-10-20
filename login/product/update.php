@@ -27,8 +27,8 @@ if (isset($_POST['Submit'])) {
     $updateSql = "UPDATE product SET 
         p_name = '$name', 
         p_detail = '$detail', 
-        p_price = $price, 
-        pt_id = $category";
+        p_price = '$price', 
+        pt_id = '$category'";
 
     if (isset($_FILES['picture']) && $_FILES['picture']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = 'images/'; // โฟลเดอร์แรก
