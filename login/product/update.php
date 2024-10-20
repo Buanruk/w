@@ -30,49 +30,33 @@ if (isset($_POST['Submit'])) {
         p_price = $price, 
         pt_id = $category";
 
-// ตรวจสอบว่ามีการอัปโหลดไฟล์หรือไม่
-if (isset($_FILES['picture']) && $_FILES['picture']['error'] === UPLOAD_ERR_OK) {
-    $uploadDir1 = 'images/'; // โฟลเดอร์แรกในโปรเจกต์
-    $uploadDir2 = '/var/www/html/w/U/images/'; // โฟลเดอร์ที่สองนอกโปรเจกต์
-
-    // กำหนดชื่อไฟล์อัปโหลด
-    $uploadFile1 = $uploadDir1 . basename($_FILES['picture']['name']);
-    $uploadFile2 = $uploadDir2 . basename($_FILES['picture']['name']);
-
-    // ลบรูปภาพเก่าในโฟลเดอร์แรก (ถ้ามี)
-    if (file_exists($uploadDir1 . $product['p_picture'])) {
-        unlink($uploadDir1 . $product['p_picture']);
-    }
-
-    // ลบรูปภาพเก่าในโฟลเดอร์ที่สอง (ถ้ามี)
-    if (file_exists($uploadDir2 . $product['p_picture'])) {
-        unlink($uploadDir2 . $product['p_picture']);
-    }
-
-    // อัปโหลดรูปภาพใหม่ไปยังโฟลเดอร์แรก
-    if (move_uploaded_file($_FILES['picture']['tmp_name'], $uploadFile1)) {
-        // ใช้ file_get_contents และ file_put_contents คัดลอกไฟล์ไปยังโฟลเดอร์ที่สอง
-        $fileContents = file_get_contents($uploadFile1); // อ่านข้อมูลจากไฟล์แรก
-
-        if ($fileContents !== false) {
-            // เขียนข้อมูลไปยังโฟลเดอร์ที่สอง
-            if (file_put_contents($uploadFile2, $fileContents) !== false) {
-                echo "ไฟล์ถูกอัปโหลดไปยังทั้งสองโฟลเดอร์สำเร็จ";
-
-                // อัปเดตชื่อไฟล์ในฐานข้อมูล
-                $updateSql .= ", p_picture = '" . mysqli_real_escape_string($conn, $_FILES['picture']['name']) . "' ";
-            } else {
-                die("เกิดข้อผิดพลาดในการเขียนไฟล์ไปยังโฟลเดอร์ที่สอง");
-            }
-        } else {
-            die("เกิดข้อผิดพลาดในการอ่านไฟล์จากโฟลเดอร์แรก");
+    if (isset($_FILES['picture']) && $_FILES['picture']['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = 'images/';
+        $uploadFile = $uploadDir . basename($_FILES['picture']['name']);
+        
+        // ลบรูปภาพเก่า (ถ้ามี)
+        if (file_exists($uploadDir . $product['p_picture'])) {
+            unlink($uploadDir . $product['p_picture']);
         }
-    } else {
-        die("เกิดข้อผิดพลาดในการอัปโหลดไฟล์ไปยังโฟลเดอร์แรก");
-    }
-}}
-?>
 
+        if (move_uploaded_file($_FILES['picture']['tmp_name'], $uploadFile)) {
+            $updateSql .= ", p_picture = '" . mysqli_real_escape_string($conn, $_FILES['picture']['name']) . "' ";
+        } else {
+            die("Error uploading file.");
+        }
+    }
+
+    $updateSql .= " WHERE p_id = $productId";
+
+    if (mysqli_query($conn, $updateSql)) {
+        header("Location: indexproduct.php");
+        exit();
+    } else {
+        die("Error updating product: " . mysqli_error($conn));
+    }
+}
+
+?>
 
 <!doctype html>
 <html>
