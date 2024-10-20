@@ -29,7 +29,7 @@ if (isset($_POST['Submit'])) {
         p_detail = '$detail', 
         p_price = $price, 
         pt_id = $category";
-/ ตรวจสอบว่ามีการอัปโหลดรูปภาพใหม่หรือไม่
+ // ตรวจสอบว่ามีการอัปโหลดรูปภาพใหม่หรือไม่
 if (isset($_FILES['picture']) && $_FILES['picture']['error'] === UPLOAD_ERR_OK) {
     $uploadDir1 = 'images/'; // โฟลเดอร์แรกในโปรเจกต์
     $uploadDir2 = '/var/www/html/images_backup/'; // โฟลเดอร์ที่สองนอกโปรเจกต์
