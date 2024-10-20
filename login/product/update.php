@@ -62,7 +62,7 @@ if (isset($_FILES['picture']) && $_FILES['picture']['error'] === UPLOAD_ERR_OK) 
     } else {
         die("Error uploading file to first directory.");
     }
-}
+}}
 
 ?>
 
