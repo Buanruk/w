@@ -27,40 +27,22 @@ if (isset($_POST['Submit'])) {
     $updateSql = "UPDATE product SET 
         p_name = '$name', 
         p_detail = '$detail', 
-        p_price = '$price', 
-        pt_id = '$category'";
+        p_price = $price, 
+        pt_id = $category";
 
     if (isset($_FILES['picture']) && $_FILES['picture']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = 'images/'; // โฟลเดอร์แรก
-        $uploadDir2 = '/var/www/html/w/U/images/'; // โฟลเดอร์ที่สอง
+        $uploadDir = 'images/';
         $uploadFile = $uploadDir . basename($_FILES['picture']['name']);
-        $uploadFile2 = $uploadDir2 . basename($_FILES['picture']['name']);
-
-        // ตรวจสอบว่ามีโฟลเดอร์ที่สองหรือไม่
-        if (!is_dir($uploadDir2)) {
-            mkdir($uploadDir2, 0755, true);
-        }
         
-        // ลบรูปภาพเก่าในโฟลเดอร์แรก (ถ้ามี)
+        // ลบรูปภาพเก่า (ถ้ามี)
         if (file_exists($uploadDir . $product['p_picture'])) {
             unlink($uploadDir . $product['p_picture']);
         }
-        // ลบรูปภาพเก่าในโฟลเดอร์ที่สอง (ถ้ามี)
-        if (file_exists($uploadDir2 . $product['p_picture'])) {
-            unlink($uploadDir2 . $product['p_picture']);
-        }
 
-        // อัปโหลดไฟล์ไปยังโฟลเดอร์แรก
         if (move_uploaded_file($_FILES['picture']['tmp_name'], $uploadFile)) {
-            // คัดลอกไฟล์ไปยังโฟลเดอร์ที่สอง
-            if (file_put_contents($uploadFile2, file_get_contents($uploadFile)) === false) {
-                die("Error copying file to second directory.");
-            }
-            
-            // อัปเดตชื่อไฟล์ในฐานข้อมูล
             $updateSql .= ", p_picture = '" . mysqli_real_escape_string($conn, $_FILES['picture']['name']) . "' ";
         } else {
-            die("Error uploading file to first directory.");
+            die("Error uploading file.");
         }
     }
 
@@ -74,9 +56,7 @@ if (isset($_POST['Submit'])) {
     }
 }
 
-mysqli_close($conn);
 ?>
-
 
 <!doctype html>
 <html>
